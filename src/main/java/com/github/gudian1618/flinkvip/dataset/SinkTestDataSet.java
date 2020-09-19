@@ -33,7 +33,7 @@ public class SinkTestDataSet {
             }
         }).groupBy(0).sum(1);
         // 4.输出数据到本地文件
-        // flink在运行时默认会调用服务器中的所有可见资源,默认使用最大化cpu核资源,如果需要单核一个进程需要调用设置
+        // flink在运行时默认会调用服务器中的所有可见资源,默认使用最大化cpu核资源,如果需要单核一个进程需要调用设置setParallelism()
         data.writeAsText("src/main/java/com/github/gudian1618/flinkvip/dataset/2.txt").setParallelism(1);
         System.out.println("执行成功!");
         // 5.触发程序执行(当输出数据为文件时,必须要触发)
