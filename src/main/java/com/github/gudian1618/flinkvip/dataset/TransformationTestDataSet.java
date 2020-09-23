@@ -3,7 +3,6 @@ package com.github.gudian1618.flinkvip.dataset;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
-import org.apache.kafka.common.protocol.types.Field;
 import scala.Tuple5;
 
 /**
