@@ -37,7 +37,7 @@ public class SinkTestDataSet {
         data.writeAsText("src/main/java/com/github/gudian1618/flinkvip/dataset/2.txt").setParallelism(1);
         System.out.println("执行成功!");
         // 5.触发程序执行(当输出数据为文件时,必须要触发)
-        env.execute("SinkTestDataSet");
+        env.execute("SinkTestDataSet.java");
     }
 
 }
