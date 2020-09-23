@@ -1,0 +1,6 @@
+(hive,5)
+(flume,5)
+(hadoop,15)
+(zookeeper,5)
+(flink,10)
+(kafka,5)
