@@ -1,10 +1,9 @@
 package com.github.gudian1618.flinkvip.dataset;
 
-import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.functions.MapPartitionFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
-import org.apache.flink.util.Collector;
+import org.apache.flink.api.java.tuple.Tuple5;
 
 /**
  * @author gudian1618
@@ -20,27 +19,49 @@ public class TransformationTestDataSet {
         // 1.获取执行环境
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
         // 2.获取数据源
-        DataSource<String> source = env.readTextFile("src/main/java/com/github/gudian1618/flinkvip/dataset/3.txt").setParallelism(1);
+        // 可以通过控制并行度来进行计算
+        DataSource<String> source =
+            env.readTextFile("src/main/java/com/github/gudian1618/flinkvip/dataset/3.txt").setParallelism(1);
         // DataSource<String> source = env.fromElements("hadoop", "hive", "flume", "kafka", "flink");
         // 3.Transformation转化
-        source.flatMap(new FlatMapFunction<String, String>() {
-            @Override
-            public void flatMap(String value, Collector<String> out) throws Exception {
-                String[] split = value.split("\\|");
-                for (String s : split) {
-                    out.collect(s);
+        source.map(new MapFunction<String, Tuple5<String, String, String, String, Integer>>() {
+                @Override
+                public Tuple5<String, String, String, String, Integer> map(String value) throws Exception {
+                    String[] s = value.split("\\|");
+                    return new Tuple5<>(s[0],s[1],s[2],s[3],Integer.parseInt(s[4]));
                 }
-            }
-        }).mapPartition(new MapPartitionFunction<String, Long>() {
-            @Override
-            public void mapPartition(Iterable<String> values, Collector<Long> out) throws Exception {
-                long l = 0;
-                for (String value : values) {
-                    l++;
-                }
-                out.collect(l);
-            }
-        })
+            }).project(2,0)
+            // ==================================================
+            // filter:过滤器,制作放行满足条件的数据(true)
+            //     .filter(new FilterFunction<String>() {
+            //     @Override
+            //     public boolean filter(String value) throws Exception {
+            //
+            //         return value.split("\\|")[2].equals("中国");
+            //     }
+            // })
+            // ========================================================================================
+            // mapPartition:默认计算分区内的数据(并行度,之前的操作)
+            //     .flatMap(new FlatMapFunction<String, String>() {
+            //     @Override
+            //     public void flatMap(String value, Collector<String> out) throws Exception {
+            //         String[] split = value.split("\\|");
+            //         for (String s : split) {
+            //             out.collect(s);
+            //         }
+            //     }
+            // }).mapPartition(new MapPartitionFunction<String, Long>() {
+            //     @Override
+            //     public void mapPartition(Iterable<String> values, Collector<Long> out) throws Exception {
+            //         long l = 0;
+            //         for (String value : values) {
+            //             l++;
+            //         }
+            //         out.collect(l);
+            //     }
+            // })
+            // ======================================================================================
+            // flatMap:进一出多
             //     .flatMap(new FlatMapFunction<String, String>() {
             //     @Override
             //     public void flatMap(String value, Collector<String> collector) throws Exception {
@@ -51,8 +72,9 @@ public class TransformationTestDataSet {
             //
             //     }
             // })
+            // ========================================================
+            // map:进一出一
             //     .map(new MapFunction<String, Book>() {
-            //
             //     @Override
             //     public Book map(String value) throws Exception {
             //         String[] s = value.split("\\|");
@@ -65,6 +87,7 @@ public class TransformationTestDataSet {
             //         return book;
             //     }
             // })
+            // ==============================================================
             //     .map(new MapFunction<String, Tuple5<String, String, String, String, Integer>>() {
             //     @Override
             //     public Tuple5<String, String, String, String, Integer> map(String value) throws Exception {
