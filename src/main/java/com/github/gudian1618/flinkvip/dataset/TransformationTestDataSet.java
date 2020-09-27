@@ -1,9 +1,7 @@
 package com.github.gudian1618.flinkvip.dataset;
 
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
-import org.apache.flink.api.java.tuple.Tuple5;
 
 /**
  * @author gudian1618
@@ -24,13 +22,17 @@ public class TransformationTestDataSet {
             env.readTextFile("src/main/java/com/github/gudian1618/flinkvip/dataset/3.txt").setParallelism(1);
         // DataSource<String> source = env.fromElements("hadoop", "hive", "flume", "kafka", "flink");
         // 3.Transformation转化
-        source.map(new MapFunction<String, Tuple5<String, String, String, String, Integer>>() {
-                @Override
-                public Tuple5<String, String, String, String, Integer> map(String value) throws Exception {
-                    String[] s = value.split("\\|");
-                    return new Tuple5<>(s[0],s[1],s[2],s[3],Integer.parseInt(s[4]));
-                }
-            }).project(2,0)
+        source
+            // ====================================================================================
+            //
+            // .map(new MapFunction<String, Tuple5<String, String, String, String, Integer>>() {
+            //     @Override
+            //     public Tuple5<String, String, String, String, Integer> map(String value) throws Exception {
+            //         String[] s = value.split("\\|");
+            //         return new Tuple5<>(s[0],s[1],s[2],s[3],Integer.parseInt(s[4]));
+            //     }
+            //     // project可以嵌套,类似于select的嵌套查询,这里是嵌套获取上次获取的数据
+            // }).project(2,0).project(1)
             // ==================================================
             // filter:过滤器,制作放行满足条件的数据(true)
             //     .filter(new FilterFunction<String>() {
@@ -88,6 +90,7 @@ public class TransformationTestDataSet {
             //     }
             // })
             // ==============================================================
+            // tuple
             //     .map(new MapFunction<String, Tuple5<String, String, String, String, Integer>>() {
             //     @Override
             //     public Tuple5<String, String, String, String, Integer> map(String value) throws Exception {
