@@ -2,7 +2,6 @@ package com.github.gudian1618.flinkvip.dataset;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.api.java.aggregation.Aggregations;
 import org.apache.flink.api.java.operators.DataSource;
 import org.apache.flink.api.java.tuple.Tuple2;
 
@@ -23,34 +22,43 @@ public class TransformationTestDataSet {
         // 可以通过控制并行度来进行计算
         // DataSource<String> source = env.readTextFile("src/main/java/com/github/gudian1618/flinkvip/dataset/3.txt").setParallelism(1);
         // DataSource<String> source = env.fromElements("hadoop", "hive", "flume", "kafka", "flink");
-        DataSource<String> source = env.fromElements("1,2", "2,7", "3,5");
-        source.map(new MapFunction<String, Tuple2<Integer,Integer>>() {
-            @Override
-            public Tuple2<Integer, Integer> map(String value) throws Exception {
-                return new Tuple2<>(Integer.parseInt(value.split(",")[0]), Integer.parseInt(value.split(",")[1]));
-            }
-        }).aggregate(Aggregations.MAX,0).and(Aggregations.MAX,1)
-        // =========== reduceGroup:进多出多 ===============================
-        // DataSource<Integer> source = env.fromElements(1, 2, 3, 4, 5, 6);
-        // source.reduceGroup(new GroupReduceFunction<Integer, Integer>() {
+        // ================== distinct:去重,可以指定按照某个或某些字段进行对比,去除重复的字段
+        // DataSource<String> source = env.fromElements("1,2", "2,7", "3,5", "3,5");
+        // source.map(new MapFunction<String, Tuple2<Integer, Integer>>() {
         //     @Override
-        //     public void reduce(Iterable<Integer> values, Collector<Integer> out) throws Exception {
-        //         int sum = 0;
-        //         for (Integer value : values) {
-        //             sum += value;
-        //             out.collect(sum);
-        //         }
+        //     public Tuple2<Integer, Integer> map(String value) throws Exception {
+        //         return new Tuple2<>(Integer.parseInt(value.split(",")[0]), Integer.parseInt(value.split(",")[1]));
         //     }
-        // })
-        // 3.Transformation转化
-        // ========= reduce:进多出一 ================================================
-        // DataSource<Integer> source = env.fromElements(1, 2, 3, 4, 5, 6);
-        // source.reduce(new ReduceFunction<Integer>() {
-        //     @Override
-        //     public Integer reduce(Integer value1, Integer value2) throws Exception {
-        //         return value1 + value2;
-        //     }
-        // })
+        // }).distinct(0,1)
+            // ============== aggregate:从一组数据中挑选数据重新组织成一个数据进行输出,进多出一 ===========================
+            // DataSource<String> source = env.fromElements("1,2", "2,7", "3,5");
+            // source.map(new MapFunction<String, Tuple2<Integer,Integer>>() {
+            //     @Override
+            //     public Tuple2<Integer, Integer> map(String value) throws Exception {
+            //         return new Tuple2<>(Integer.parseInt(value.split(",")[0]), Integer.parseInt(value.split(",")[1]));
+            //     }
+            // }).aggregate(Aggregations.SUM,0).and(Aggregations.MIN,1)
+            // =========== reduceGroup:进多出多 ===============================
+            // DataSource<Integer> source = env.fromElements(1, 2, 3, 4, 5, 6);
+            // source.reduceGroup(new GroupReduceFunction<Integer, Integer>() {
+            //     @Override
+            //     public void reduce(Iterable<Integer> values, Collector<Integer> out) throws Exception {
+            //         int sum = 0;
+            //         for (Integer value : values) {
+            //             sum += value;
+            //             out.collect(sum);
+            //         }
+            //     }
+            // })
+            // 3.Transformation转化
+            // ========= reduce:进多出一 ================================================
+            // DataSource<Integer> source = env.fromElements(1, 2, 3, 4, 5, 6);
+            // source.reduce(new ReduceFunction<Integer>() {
+            //     @Override
+            //     public Integer reduce(Integer value1, Integer value2) throws Exception {
+            //         return value1 + value2;
+            //     }
+            // })
             // ====================================================================================
             //
             // .map(new MapFunction<String, Tuple5<String, String, String, String, Integer>>() {
