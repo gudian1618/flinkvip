@@ -1,6 +1,7 @@
 package com.github.gudian1618.flinkvip.dataset;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.MapPartitionFunction;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
 import org.apache.flink.util.Collector;
@@ -19,18 +20,37 @@ public class TransformationTestDataSet {
         // 1.获取执行环境
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
         // 2.获取数据源
-        DataSource<String> source = env.readTextFile("src/main/java/com/github/gudian1618/flinkvip/dataset/3.txt");
+        DataSource<String> source = env.readTextFile("src/main/java/com/github/gudian1618/flinkvip/dataset/3.txt").setParallelism(1);
+        // DataSource<String> source = env.fromElements("hadoop", "hive", "flume", "kafka", "flink");
         // 3.Transformation转化
         source.flatMap(new FlatMapFunction<String, String>() {
             @Override
-            public void flatMap(String value, Collector<String> collector) throws Exception {
+            public void flatMap(String value, Collector<String> out) throws Exception {
                 String[] split = value.split("\\|");
-                for (int i = 0; i < split.length; i++) {
-                    collector.collect(split[i] + " " + i);
+                for (String s : split) {
+                    out.collect(s);
                 }
-
+            }
+        }).mapPartition(new MapPartitionFunction<String, Long>() {
+            @Override
+            public void mapPartition(Iterable<String> values, Collector<Long> out) throws Exception {
+                long l = 0;
+                for (String value : values) {
+                    l++;
+                }
+                out.collect(l);
             }
         })
+            //     .flatMap(new FlatMapFunction<String, String>() {
+            //     @Override
+            //     public void flatMap(String value, Collector<String> collector) throws Exception {
+            //         String[] split = value.split("\\|");
+            //         for (int i = 0; i < split.length; i++) {
+            //             collector.collect(split[i] + " " + i);
+            //         }
+            //
+            //     }
+            // })
             //     .map(new MapFunction<String, Book>() {
             //
             //     @Override
