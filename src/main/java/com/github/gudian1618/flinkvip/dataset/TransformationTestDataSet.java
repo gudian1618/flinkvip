@@ -3,7 +3,9 @@ package com.github.gudian1618.flinkvip.dataset;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.operators.DataSource;
+import org.apache.flink.api.java.operators.MapOperator;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple3;
 
 /**
  * @author gudian1618
@@ -22,14 +24,33 @@ public class TransformationTestDataSet {
         // 可以通过控制并行度来进行计算
         // DataSource<String> source = env.readTextFile("src/main/java/com/github/gudian1618/flinkvip/dataset/3.txt").setParallelism(1);
         // DataSource<String> source = env.fromElements("hadoop", "hive", "flume", "kafka", "flink");
-        // ================== distinct:去重,可以指定按照某个或某些字段进行对比,去除重复的字段
-        // DataSource<String> source = env.fromElements("1,2", "2,7", "3,5", "3,5");
-        // source.map(new MapFunction<String, Tuple2<Integer, Integer>>() {
-        //     @Override
-        //     public Tuple2<Integer, Integer> map(String value) throws Exception {
-        //         return new Tuple2<>(Integer.parseInt(value.split(",")[0]), Integer.parseInt(value.split(",")[1]));
-        //     }
-        // }).distinct(0,1)
+        // =================================================
+        DataSource<String> source1 = env.fromElements("1|铁锤|22", "2|钢蛋|18");
+        DataSource<String> source2 = env.fromElements("铁锤|北京", "钢蛋|上海");
+        MapOperator<String, Tuple3<String, String, String>> input1 = source1.map(new MapFunction<String, Tuple3<String, String, String>>() {
+            @Override
+            public Tuple3<String, String, String> map(String value) throws Exception {
+                String[] s = value.split("\\|");
+                return new Tuple3<>(s[0], s[1], s[2]);
+            }
+        });
+        MapOperator<String, Tuple2<String, String>> input2 = source2.map(new MapFunction<String, Tuple2<String, String>>() {
+            @Override
+            public Tuple2<String, String> map(String value) throws Exception {
+                String[] s = value.split("\\|");
+                return new Tuple2<>(s[0], s[1]);
+            }
+        });
+        input1.join(input2).where(1).equalTo(0)
+
+            // ================== distinct:去重,可以指定按照某个或某些字段进行对比,去除重复的字段 ==============================
+            // DataSource<String> source = env.fromElements("1,2", "2,7", "3,5", "3,5");
+            // source.map(new MapFunction<String, Tuple2<Integer, Integer>>() {
+            //     @Override
+            //     public Tuple2<Integer, Integer> map(String value) throws Exception {
+            //         return new Tuple2<>(Integer.parseInt(value.split(",")[0]), Integer.parseInt(value.split(",")[1]));
+            //     }
+            // }).distinct(0,1)
             // ============== aggregate:从一组数据中挑选数据重新组织成一个数据进行输出,进多出一 ===========================
             // DataSource<String> source = env.fromElements("1,2", "2,7", "3,5");
             // source.map(new MapFunction<String, Tuple2<Integer,Integer>>() {
