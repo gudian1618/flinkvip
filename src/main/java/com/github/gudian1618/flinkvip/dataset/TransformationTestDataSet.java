@@ -20,11 +20,20 @@ public class TransformationTestDataSet {
         // 可以通过控制并行度来进行计算
         // DataSource<String> source = env.readTextFile("src/main/java/com/github/gudian1618/flinkvip/dataset/3.txt").setParallelism(1);
         // DataSource<String> source = env.fromElements("hadoop", "hive", "flume", "kafka", "flink");
-        // ==============  =====================
+        // ================  ===========================
+        // ================  ===========================
+        // ================  ===========================
+        // ================  ===========================
+
+        // ================ union:两个数据集中的数据的并集,要求两个数据字段必须一致 ===========================
         DataSource<String> source1 = env.fromElements("1|铁锤|22", "2|钢蛋|18", "3|琪琪|18");
         DataSource<String> source2 = env.fromElements("铁锤|北京", "钢蛋|上海", "狗蛋|上海");
-        source1.cross(source2)
-
+        // 字段必须相同
+        source1.union(source2)
+        // ============== cross:笛卡尔积 =====================
+        // DataSource<String> source1 = env.fromElements("1|铁锤|22", "2|钢蛋|18", "3|琪琪|18");
+        // DataSource<String> source2 = env.fromElements("铁锤|北京", "钢蛋|上海", "狗蛋|上海");
+        // source1.cross(source2)
         // ==================== coGroup:相当于详细版本的join,join直接输出结果,而coGroup可以控制细节 ================================
         // DataSource<String> source1 = env.fromElements("1|铁锤|22", "2|钢蛋|18", "3|琪琪|18");
         // DataSource<String> source2 = env.fromElements("铁锤|北京", "钢蛋|上海", "狗蛋|上海");
