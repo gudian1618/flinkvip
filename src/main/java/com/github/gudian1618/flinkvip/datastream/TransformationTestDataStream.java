@@ -1,9 +1,9 @@
 package com.github.gudian1618.flinkvip.datastream;
 
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.time.Time;
 
 /**
  * @author gudian1618
@@ -40,14 +40,21 @@ public class TransformationTestDataStream {
                     user.setGender(s[3]);
                     return user;
                 }
-            }).keyBy("gender").reduce(new ReduceFunction<User>() {
-            @Override
-            public User reduce(User value1, User value2) throws Exception {
-                User user = value1;
-                user.setAge(value1.getAge() + value2.getAge());
-                return user;
-            }
-        })
+            })
+            .keyBy("gender")
+            .timeWindow(Time.seconds(5))
+            // .window(TumblingProcessingTimeWindows.of(Time.seconds(10),Time.seconds(5)))
+            .sum("age")
+            // .max("age")
+            // .sum("age")
+            // .reduce(new ReduceFunction<User>() {
+            // @Override
+            // public User reduce(User value1, User value2) throws Exception {
+            //     User user = value1;
+            //     user.setAge(value1.getAge() + value2.getAge());
+            //     return user;
+            // }
+            // })
             // 封装为tuple
             //     .map(new MapFunction<String, Tuple4<String, String, Integer, String>>() {
             //     @Override
@@ -63,6 +70,7 @@ public class TransformationTestDataStream {
             // }).project(2,3)
             // 4.输出数据
             .print();
+
         // 5.触发执行
         env.execute("TransformationTestDataStream");
     }
